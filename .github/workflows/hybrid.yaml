@@ -1,0 +1,37 @@
+name: CI
+
+# on: [push, pull_request]
+on: [repository_dispatch, workflow_dispatch]
+
+jobs:
+  core-tests:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os:
+          - ubuntu-latest
+        python-version:
+          - '3.12'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+      - name: Install Dependencies
+        run: libpython3.11-minimal:amd64
+      - run: |
+          poetry --version
+      - run: |
+          poetry cache clear pypi --all
+      - run: |
+          pip wheel --use-pep517 "future==0.18.3"
+      - run: |
+          poetry install --all-extras --with dev --verbose
+      - run: |
+          make format_diff
+          make spell_check
+          make test_core
+          poetry run coverage run --source=pandasai -m pytest tests
+          poetry run coverage xml
+    env:
+      COVERAGE_RUN: 'true'

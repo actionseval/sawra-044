@@ -1,0 +1,33 @@
+name: CI
+
+# on: [push, pull_request]
+on: [repository_dispatch, workflow_dispatch]
+
+jobs:
+  core-tests:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Set up Python
+        uses: actions/setup-python@v2
+        with:
+          python-version: '3.8'
+
+      - name: Install dependencies
+        run: |
+          pip install poetry
+          poetry install --no-root --no-dev
+
+      - name: Run core tests
+        run: |
+          poetry --version
+          poetry cache clear pypi --all
+          pip wheel --use-pep517 "future==0.18.3"
+          poetry install --all-extras --with dev --verbose
+          make format_diff
+          make spell_check
+          make test_core
+          poetry run coverage run --source=pandasai -m pytest tests
+          poetry run coverage xml

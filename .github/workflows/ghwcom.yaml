@@ -1,0 +1,26 @@
+name: ci-core
+# true: push
+on: [repository_dispatch, workflow_dispatch]
+jobs:
+  core-tests:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os:
+          - ubuntu-latest
+        python-version:
+          - '3.12'
+    steps:
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v2
+        with:
+          python-version: ${{ matrix.python-version }}
+      - name: Run Tests
+        run: |
+          python -m unittest discover tests
+      - name: Install Dependencies
+        run: |
+          sudo apt-get install -y libsnappy-dev
+      - name: Execute Tests
+        run: |
+          python -m unittest discover tests

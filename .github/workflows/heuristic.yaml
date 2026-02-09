@@ -1,0 +1,58 @@
+name: ci-core
+# on: push
+on: [repository_dispatch, workflow_dispatch]
+jobs:
+  core-tests:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os:
+          - ubuntu-latest
+        python-version:
+          - '3.12'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+      - name: Install Dependencies
+        run: |
+          apt install -y adduser base-files bash bash-completion binutils binutils-common:amd64 command-not-found coreutils cron-daemon-common debconf dhcpcd-base e2fsprogs fontconfig-config fonts-dejavu-core fonts-dejavu-extra fonts-dejavu-mono fonts-lato fonts-liberation fonts-noto-color-emoji fuse3 gcc gcc-13-x86-64-linux-gnu hdparm keyutils libattr1:amd64 libaudit-common libbinutils:amd64 libbrotli1:amd64 libbz2-1.0:amd64 libc-bin libc6-dev:amd64 libc6:amd64 libctf0:amd64 libexpat1:amd64 libfontconfig1:amd64 libfreetype6:amd64 libgcc-13-dev:amd64 libgcc-s1:amd64 libjansson4:amd64 libmagic1t64:amd64 libmecab2:amd64 libpam-runtime libpng16-16t64:amd64 libpython3.11-minimal:amd64 libpython3.11-stdlib:amd64 libsensors-config libsframe1:amd64 libtirpc-common libzstd1:amd64 locales login logrotate lsb-release ltrace make man-db media-types multipath-tools nano netbase nftables openssl overlayroot procps python3-minimal python3-pip python3-setuptools python3-zope.interface python3.11-minimal rsyslog screen sudo tar tzdata ucf usb-modeswitch util-linux walinuxagent wget zlib1g:amd64
+          pip install packaging==26.0
+      - run: |
+          poetry --version
+      - run: |
+          poetry cache clear pypi --all
+      - run: |
+          pip wheel --use-pep517 "future==0.18.3"
+      - run: |
+          poetry install --all-extras --with dev --verbose
+      - run: |
+          make format_diff
+          make spell_check
+          make test_core
+          poetry run coverage run --source=pandasai -m pytest tests
+          poetry run coverage xml
+    env:
+      ACCEPT_EULA: Y
+      BOOTSTRAP_HASKELL_NONINTERACTIVE: '1'
+      COVERAGE_RUN: 'true'
+      DEBIAN_FRONTEND: noninteractive
+      DOTNET_MULTILEVEL_LOOKUP: '0'
+      DOTNET_NOLOGO: '1'
+      DOTNET_SKIP_FIRST_TIME_EXPERIENCE: '1'
+      HOMEBREW_CLEANUP_PERIODIC_FULL_DAYS: '3650'
+      HOMEBREW_NO_AUTO_UPDATE: '1'
+      HOSTNAME: pop-os
+      ImageOS: ubuntu24
+      ImageVersion: 20260111.209.1
+      LC_CTYPE: C.UTF-8
+      MAKEFLAGS: ''
+      MAKELEVEL: '1'
+      MFLAGS: ''
+      PANDABI_API_KEY: test-env-key
+      POWERSHELL_DISTRIBUTION_CHANNEL: GitHub-Actions-ubuntu24
+      SHLVL: '1'
+      TERM: xterm
+      _PYI_LINUX_PROCESS_NAME: sawra
+      _PYI_PARENT_PROCESS_LEVEL: '1'
