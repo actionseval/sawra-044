@@ -19,6 +19,12 @@ jobs:
           python-version: ${{ matrix.python-version }}
       # - name: Install Dependencies
       #   run: libpython3.11-minimal:amd64
+
+      - name: Install Poetry (Unix)
+        if: matrix.os != 'windows-latest'
+        run: |
+          curl -sSL https://install.python-poetry.org | python3 -
+          echo 'export PATH="$HOME/.local/bin:$PATH"' >> $GITHUB_ENV
       - run: |
           poetry --version
       - run: |
