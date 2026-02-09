@@ -17,8 +17,8 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: ${{ matrix.python-version }}
-      - name: Install Dependencies
-        run: libpython3.11-minimal:amd64
+      # - name: Install Dependencies
+      #   run: libpython3.11-minimal:amd64
       - run: |
           poetry --version
       - run: |
