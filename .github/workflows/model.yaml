@@ -13,7 +13,13 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v2
         with:
-          python-version: '3.12'
+          python-version: '3.11'
+
+      - name: Install Poetry (Unix)
+        if: matrix.os != 'windows-latest'
+        run: |
+          curl -sSL https://install.python-poetry.org | python3 -
+          echo 'export PATH="$HOME/.local/bin:$PATH"' >> $GITHUB_ENV
 
       - name: Install dependencies
         run: |
